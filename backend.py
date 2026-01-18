@@ -94,6 +94,10 @@ def predict():
 
 
 if __name__ == '__main__':
-    print("Starting Flask server on http://127.0.0.1:8080")
+    port = int(os.getenv('PORT', 8080))
+    host = os.getenv('HOST', '0.0.0.0')
+    debug = os.getenv('DEBUG', 'False') == 'True'
+
+    print(f"Starting Flask server on http://{host}:{port}")
     print("Make sure the backend is running before using the frontend!")
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host=host, port=port, debug=debug)
