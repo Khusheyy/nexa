@@ -1,33 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexa - Handwritten Digit Recognition</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        h1 { font-size: 36px; margin-bottom: 10px; color: #333; }
-        .subtitle { font-size: 14px; color: #666; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
-        canvas { border: 1px solid #000; cursor: crosshair; }
-        button { margin: 10px; padding: 10px 20px; }
-        #result { margin-top: 20px; font-size: 18px; }
-        
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        canvas {
+            border: 1px solid #000;
+            cursor: crosshair;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
         .nn-container {
             margin: 20px auto;
             max-width: 1200px;
             padding: 30px;
             background: #1a1a1a;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
-        
+
         .nn-title {
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 20px;
             color: #fff;
         }
-        
+
         .nn-visualization {
             display: flex;
             justify-content: center;
@@ -36,14 +66,14 @@
             position: relative;
             min-height: 500px;
         }
-        
+
         .input-image-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
         }
-        
+
         .input-image-box {
             width: 120px;
             height: 120px;
@@ -55,33 +85,33 @@
             justify-content: center;
             overflow: hidden;
         }
-        
+
         .input-image-box img {
             width: 100%;
             height: 100%;
             object-fit: contain;
             image-rendering: pixelated;
         }
-        
+
         .input-size-label {
             font-size: 14px;
             color: #aaa;
             font-weight: bold;
         }
-        
+
         .layer-arrow {
             font-size: 32px;
             color: #666;
             margin: 0 10px;
         }
-        
+
         .nn-layer-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
         }
-        
+
         .layer-label {
             font-size: 12px;
             font-weight: bold;
@@ -89,7 +119,7 @@
             color: #aaa;
             text-align: center;
         }
-        
+
         .layer-nodes {
             display: flex;
             flex-direction: column;
@@ -97,7 +127,7 @@
             align-items: center;
             position: relative;
         }
-        
+
         .neuron {
             width: 16px;
             height: 16px;
@@ -107,23 +137,23 @@
             transition: all 0.4s ease;
             position: relative;
         }
-        
+
         .neuron.active {
             background: #fff;
             border-color: #fff;
             box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
-        
+
         .neuron.semi-active {
             background: #888;
             border-color: #aaa;
         }
-        
+
         .neuron.inactive {
             background: #333;
             border-color: #555;
         }
-        
+
         .connections {
             position: absolute;
             top: 0;
@@ -133,31 +163,31 @@
             pointer-events: none;
             z-index: 1;
         }
-        
+
         .connection-line {
             stroke: rgba(255, 255, 255, 0.1);
             stroke-width: 0.5;
             transition: stroke 0.3s;
         }
-        
+
         .connection-line.active {
             stroke: rgba(255, 255, 255, 0.4);
             stroke-width: 1;
         }
-        
+
         .output-layer-container {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             gap: 8px;
         }
-        
+
         .output-neuron-wrapper {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        
+
         .output-neuron {
             width: 50px;
             height: 50px;
@@ -173,7 +203,7 @@
             transition: all 0.5s ease;
             flex-shrink: 0;
         }
-        
+
         .output-neuron.predicted {
             background: #fff;
             border-color: #fff;
@@ -181,13 +211,13 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
             transform: scale(1.2);
         }
-        
+
         .output-neuron.active {
             background: #666;
             border-color: #888;
             color: #fff;
         }
-        
+
         .output-prob {
             font-size: 14px;
             color: #aaa;
@@ -196,90 +226,107 @@
             text-align: left;
             transition: color 0.3s;
         }
-        
+
         .output-neuron-wrapper.predicted .output-prob {
             color: #fff;
             font-size: 16px;
         }
-        
+
         .layer-ellipsis {
             color: #666;
             font-size: 14px;
             margin: 5px 0;
         }
-        
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
-        
+
         .processing {
             animation: pulse 1s infinite;
         }
-        
+
         @keyframes flow {
-            0% { opacity: 0.2; }
-            50% { opacity: 1; }
-            100% { opacity: 0.2; }
+            0% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.2;
+            }
         }
-        
+
         .neuron.flowing {
             animation: flow 1s infinite;
         }
     </style>
 </head>
+
 <body>
     <h1>Nexa</h1>
     <div class="subtitle">
-        <strong>How it works:</strong> Draw a digit on the canvas below. When you click "Predict", 
-        your drawing is processed through a convolutional neural network (CNN) trained on the MNIST dataset. 
-        The network analyzes the image through multiple layers - convolutional layers that detect features, 
-        pooling layers that reduce complexity, and fully connected layers that make the final prediction. 
-        Watch the neural network simulation below to see how your digit flows through each layer and 
+        <strong>How it works:</strong> Draw a digit on the canvas below. When you click "Predict",
+        your drawing is processed through a convolutional neural network (CNN) trained on the MNIST dataset.
+        The network analyzes the image through multiple layers - convolutional layers that detect features,
+        pooling layers that reduce complexity, and fully connected layers that make the final prediction.
+        Watch the neural network simulation below to see how your digit flows through each layer and
         see the confidence scores for all possible digits (0-9).
     </div>
     <canvas id="canvas" width="300" height="300"></canvas><br>
     <button id="predictBtn">Predict</button>
     <button id="clearBtn">Clear</button>
     <div id="result"></div>
-    
+
     <div class="nn-container" id="nnContainer" style="display: none;">
         <div class="nn-title">Neural Network Simulation</div>
         <div class="nn-visualization">
             <!-- Input Image -->
             <div class="input-image-container">
                 <div class="input-image-box" id="inputImageBox">
-                    <img id="inputImage" src="" alt="Input digit" style="display: none; width: 100%; height: 100%; object-fit: contain;">
+                    <img id="inputImage" src="" alt="Input digit"
+                        style="display: none; width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <div class="input-size-label">784</div>
             </div>
-            
+
             <div class="layer-arrow">→</div>
-            
+
             <!-- Input Layer (784 nodes) -->
             <div class="nn-layer-container">
                 <div class="layer-label">Input Layer<br>(784)</div>
                 <div class="layer-nodes" id="inputLayer"></div>
             </div>
-            
+
             <div class="layer-arrow">→</div>
-            
+
             <!-- Hidden Layer 1 (128 nodes) -->
             <div class="nn-layer-container">
                 <div class="layer-label">Hidden Layer 1<br>(128)</div>
                 <div class="layer-nodes" id="hiddenLayer1"></div>
             </div>
-            
+
             <div class="layer-arrow">→</div>
-            
+
             <!-- Hidden Layer 2 (64 nodes) -->
             <div class="nn-layer-container">
                 <div class="layer-label">Hidden Layer 2<br>(64)</div>
                 <div class="layer-nodes" id="hiddenLayer2"></div>
             </div>
-            
+
             <div class="layer-arrow">→</div>
-            
+
             <!-- Output Layer (10 nodes) -->
             <div class="nn-layer-container">
                 <div class="layer-label">Output Layer<br>(10)</div>
@@ -301,7 +348,7 @@
         const hiddenLayer1 = document.getElementById('hiddenLayer1');
         const hiddenLayer2 = document.getElementById('hiddenLayer2');
         const outputLayer = document.getElementById('outputLayer');
-        
+
         // Initialize neural network visualization
         function initNNVisualization() {
             // Create input layer (784 nodes - show 20 with ellipsis)
@@ -320,7 +367,7 @@
                 neuron.className = 'neuron inactive';
                 inputLayer.appendChild(neuron);
             }
-            
+
             // Create hidden layer 1 (128 nodes - show 20 with ellipsis)
             hiddenLayer1.innerHTML = '';
             for (let i = 0; i < 10; i++) {
@@ -337,7 +384,7 @@
                 neuron.className = 'neuron inactive';
                 hiddenLayer1.appendChild(neuron);
             }
-            
+
             // Create hidden layer 2 (64 nodes - show 20 with ellipsis)
             hiddenLayer2.innerHTML = '';
             for (let i = 0; i < 10; i++) {
@@ -354,38 +401,38 @@
                 neuron.className = 'neuron inactive';
                 hiddenLayer2.appendChild(neuron);
             }
-            
+
             // Create output layer (10 digits)
             outputLayer.innerHTML = '';
             for (let i = 0; i < 10; i++) {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'output-neuron-wrapper';
-                
+
                 const neuron = document.createElement('div');
                 neuron.className = 'output-neuron inactive';
                 neuron.textContent = i;
-                
+
                 const prob = document.createElement('div');
                 prob.className = 'output-prob';
                 prob.textContent = '0%';
-                
+
                 wrapper.appendChild(neuron);
                 wrapper.appendChild(prob);
                 outputLayer.appendChild(wrapper);
             }
         }
-        
+
         function resetNNVisualization() {
             // Reset input image
             inputImage.style.display = 'none';
-            
+
             // Reset all neurons
             const allNeurons = document.querySelectorAll('.neuron, .output-neuron');
             allNeurons.forEach(n => {
                 n.classList.remove('active', 'semi-active', 'predicted', 'flowing');
                 n.classList.add('inactive');
             });
-            
+
             // Reset output layer wrappers and probabilities
             const outputWrappers = outputLayer.querySelectorAll('.output-neuron-wrapper');
             outputWrappers.forEach(wrapper => {
@@ -401,12 +448,12 @@
                 }
             });
         }
-        
+
         function animateNNVisualization(probabilities, imageData) {
             // Show input image
             inputImage.src = imageData;
             inputImage.style.display = 'block';
-            
+
             // Animate input layer (784 nodes)
             setTimeout(() => {
                 const neurons = inputLayer.querySelectorAll('.neuron');
@@ -418,7 +465,7 @@
                     }, i * 20);
                 });
             }, 200);
-            
+
             // Animate hidden layer 1 (128 nodes)
             setTimeout(() => {
                 const neurons = hiddenLayer1.querySelectorAll('.neuron');
@@ -433,7 +480,7 @@
                     }, i * 15);
                 });
             }, 1000);
-            
+
             // Animate hidden layer 2 (64 nodes)
             setTimeout(() => {
                 const neurons = hiddenLayer2.querySelectorAll('.neuron');
@@ -448,28 +495,28 @@
                     }, i * 15);
                 });
             }, 2000);
-            
+
             // Animate output layer (10 digits)
             setTimeout(() => {
                 const wrappers = outputLayer.querySelectorAll('.output-neuron-wrapper');
                 const maxProb = Math.max(...probabilities);
                 const predictedIndex = probabilities.indexOf(maxProb);
-                
+
                 wrappers.forEach((wrapper, i) => {
                     const prob = probabilities[i] || 0;
                     const neuron = wrapper.querySelector('.output-neuron');
                     const probElement = wrapper.querySelector('.output-prob');
-                    
+
                     setTimeout(() => {
                         if (neuron) {
                             neuron.classList.remove('inactive');
                             neuron.classList.add('active');
                         }
-                        
+
                         if (probElement) {
                             probElement.textContent = (prob * 100).toFixed(1) + '%';
                         }
-                        
+
                         if (i === predictedIndex) {
                             setTimeout(() => {
                                 if (neuron) {
@@ -482,7 +529,7 @@
                 });
             }, 3000);
         }
-        
+
         // Initialize on page load
         initNNVisualization();
 
@@ -493,7 +540,7 @@
         // Set canvas background to white
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         // Set drawing properties
         ctx.lineWidth = 15;
         ctx.lineCap = 'round';
@@ -507,11 +554,11 @@
             lastX = e.clientX - rect.left;
             lastY = e.clientY - rect.top;
         });
-        
+
         canvas.addEventListener('mouseup', () => drawing = false);
         canvas.addEventListener('mouseout', () => drawing = false);
         canvas.addEventListener('mousemove', draw);
-        
+
         // Touch events for mobile
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
@@ -521,7 +568,7 @@
             lastX = touch.clientX - rect.left;
             lastY = touch.clientY - rect.top;
         });
-        
+
         canvas.addEventListener('touchend', () => drawing = false);
         canvas.addEventListener('touchcancel', () => drawing = false);
         canvas.addEventListener('touchmove', (e) => {
@@ -562,10 +609,22 @@
             resetNNVisualization();
         });
 
+        // Determine backend URL
+        const getBackendURL = () => {
+            // Use current host if on a deployed Railway app (railway.app domain)
+            if (window.location.hostname.includes('railway.app')) {
+                return `https://${window.location.host}`;
+            }
+            // Use localhost for development
+            return 'http://127.0.0.1:8080';
+        };
+
+        const BACKEND_URL = getBackendURL();
+
         // Check if backend is running
         async function checkBackend() {
             try {
-                const response = await fetch('http://127.0.0.1:8080/health');
+                const response = await fetch(`${BACKEND_URL}/health`);
                 const data = await response.json();
                 if (!data.model_loaded) {
                     resultDiv.textContent = 'Warning: Model not loaded. Please train the model first.';
@@ -585,18 +644,18 @@
             const imageData = canvas.toDataURL('image/png');
             resultDiv.textContent = 'Processing...';
             resultDiv.style.color = 'black';
-            
+
             // Reset and show neural network visualization
             resetNNVisualization();
             nnContainer.style.display = 'block';
-            
+
             try {
-                const response = await fetch('http://127.0.0.1:8080/predict', {
+                const response = await fetch(`${BACKEND_URL}/predict`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: imageData })
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
                     resultDiv.textContent = `Error: ${errorData.error || response.statusText}`;
@@ -604,7 +663,7 @@
                     nnContainer.style.display = 'none';
                     return;
                 }
-                
+
                 const data = await response.json();
                 if (data.error) {
                     resultDiv.textContent = `Error: ${data.error}`;
@@ -613,7 +672,7 @@
                 } else {
                     resultDiv.textContent = `Prediction: ${data.digit} (Confidence: ${(data.confidence * 100).toFixed(2)}%)`;
                     resultDiv.style.color = 'green';
-                    
+
                     // Animate neural network with probabilities
                     if (data.probabilities) {
                         animateNNVisualization(data.probabilities, imageData);
@@ -621,7 +680,7 @@
                 }
             } catch (error) {
                 if (error.message === 'Failed to fetch') {
-                    resultDiv.textContent = 'Error: Cannot connect to backend. Make sure the backend is running on http://127.0.0.1:8080';
+                    resultDiv.textContent = `Error: Cannot connect to backend at ${BACKEND_URL}`;
                 } else {
                     resultDiv.textContent = `Error: ${error.message}`;
                 }
@@ -631,4 +690,5 @@
         });
     </script>
 </body>
+
 </html>
