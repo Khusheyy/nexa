@@ -6,6 +6,7 @@ from PIL import Image
 import io
 import base64
 import os
+import cv2
 
 app = Flask(__name__, static_folder='.',
             static_url_path='')
@@ -23,6 +24,76 @@ else:
     except Exception as e:
         print(f"Error loading model: {e}")
         model = None
+
+
+def preprocess_image(image):
+    """
+    Preprocess canvas image to match MNIST format exactly
+
+    Args:
+        image: PIL Image object (grayscale)
+
+    Returns:
+        Preprocessed numpy array ready for model
+    """
+    # Convert to numpy array
+    img_array = np.array(image)
+
+    # Invert: black on white -> white on black (like MNIST)
+    img_array = 255 - img_array
+
+    # Find the bounding box of non-zero pixels (the digit)
+    coords = cv2.findNonZero(img_array)
+
+    if coords is None:
+        # Empty image - return blank 28x28
+        return np.zeros((1, 28, 28, 1), dtype=np.float32)
+
+    x, y, w, h = cv2.boundingRect(coords)
+
+    # Add small padding around the digit
+    padding = 4
+    x = max(0, x - padding)
+    y = max(0, y - padding)
+    w = min(img_array.shape[1] - x, w + 2 * padding)
+    h = min(img_array.shape[0] - y, h + 2 * padding)
+
+    # Crop to bounding box
+    cropped = img_array[y:y+h, x:x+w]
+
+    # Calculate aspect ratio to fit in 20x20 (leaving 4px border for 28x28)
+    aspect_ratio = w / h
+
+    if aspect_ratio > 1:
+        # Wider than tall
+        new_width = 20
+        new_height = max(1, int(20 / aspect_ratio))
+    else:
+        # Taller than wide
+        new_height = 20
+        new_width = max(1, int(20 * aspect_ratio))
+
+    # Resize the cropped digit
+    resized = cv2.resize(cropped, (new_width, new_height),
+                         interpolation=cv2.INTER_AREA)
+
+    # Create 28x28 black canvas
+    canvas = np.zeros((28, 28), dtype=np.uint8)
+
+    # Calculate position to center the digit
+    offset_x = (28 - new_width) // 2
+    offset_y = (28 - new_height) // 2
+
+    # Paste the digit in center
+    canvas[offset_y:offset_y+new_height, offset_x:offset_x+new_width] = resized
+
+    # Normalize to 0-1 range
+    canvas = canvas.astype(np.float32) / 255.0
+
+    # Reshape for model input
+    canvas = canvas.reshape(1, 28, 28, 1)
+
+    return canvas
 
 
 @app.route('/health', methods=['GET'])
@@ -55,23 +126,11 @@ def predict():
             ',')[1] if ',' in data['image'] else data['image']
         image_bytes = base64.b64decode(image_data)
 
+        # Load and convert to grayscale
         image = Image.open(io.BytesIO(image_bytes)).convert('L')
-        image = image.resize((28, 28), Image.Resampling.LANCZOS)
 
-        # Convert to numpy array
-        image_array = np.array(image)
-
-        # CRITICAL FIX: Invert the image
-        # Your canvas: BLACK digits on WHITE background
-        # MNIST trained: WHITE digits on BLACK background
-        # This line flips black <-> white to match training data
-        image_array = 255 - image_array
-
-        # Normalize to 0-1 range
-        image_array = image_array / 255.0
-
-        # Reshape for model input
-        image_array = image_array.reshape(1, 28, 28, 1)
+        # Apply proper preprocessing (centering, padding, etc.)
+        image_array = preprocess_image(image)
 
         # Make prediction
         predictions = model.predict(image_array, verbose=0)
