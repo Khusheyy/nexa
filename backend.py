@@ -8,6 +8,8 @@ import base64
 import os
 
 
+# Moji (文字) – characters / letters
+
 app = Flask(__name__, static_folder='.',
             static_url_path='')
 CORS(app)
@@ -59,22 +61,14 @@ def predict():
         image = Image.open(io.BytesIO(image_bytes)).convert('L')
         image = image.resize((28, 28), Image.Resampling.LANCZOS)
 
-        # Convert to numpy array
+        # converting image to numpy array
         image_array = np.array(image)
-
-        # CRITICAL FIX: Invert the image
-        # Your canvas: BLACK digits on WHITE background
-        # MNIST trained: WHITE digits on BLACK background
-        # This line flips black <-> white to match training data
-        image_array = 255 - image_array
-
-        # Normalize to 0-1 range
+        image_array = 255 - image_array  # invert colors
+        # normalize to 0-1 range
         image_array = image_array / 255.0
-
-        # Reshape for model input
+        # reshape
         image_array = image_array.reshape(1, 28, 28, 1)
 
-        # Make prediction
         predictions = model.predict(image_array, verbose=0)
         predicted_digit = np.argmax(predictions[0])
         confidence = float(np.max(predictions[0]))
