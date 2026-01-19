@@ -1,6 +1,6 @@
 #  moji - handwritten digit recognition
 
-**[Try it live here](https://moji.up.railway.app/)**
+**[moji live link](https://moji.up.railway.app/)**
 
 A simple web application that recognizes handwritten digits (0-9) using machine learning. Draw a digit on your screen, and the AI predicts what you wrote!
 
