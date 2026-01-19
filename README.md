@@ -1,10 +1,10 @@
-#  Handwritten Digit Recognition
+#  moji - handwritten digit recognition
 
 A simple web application that recognizes handwritten digits (0-9) using machine learning. Draw a digit on your screen, and the AI predicts what you wrote!
 
 ---
 
-## 📋 What You Need
+## What You Need
 
 - Python 3.7 or higher
 - pip (Python package manager)
@@ -12,7 +12,7 @@ A simple web application that recognizes handwritten digits (0-9) using machine 
 
 ---
 
-## 🚀 Quick Start (3 Steps)
+## Quick Start (3 Steps)
 
 ### Step 1: Install Dependencies
 ```bash
@@ -33,7 +33,7 @@ Then open `index.html` in your web browser.
 
 ---
 
-## 💡 How to Use
+## How to Use
 
 1. **Draw** a digit (0-9) on the canvas using your mouse
 2. **Click "Predict"** to see what the AI thinks you drew
@@ -42,21 +42,12 @@ Then open `index.html` in your web browser.
 
 ---
 
-## ⚙️ Technical Details
+## Technical Details
 
 - **Backend**: Python Flask server running on `http://localhost:8080`
 - **Frontend**: HTML/CSS/JavaScript for drawing interface
 - **Model**: Convolutional Neural Network (CNN) trained on MNIST handwritten digit dataset
 - **Framework**: TensorFlow/Keras
-
----
-
-## 📝 Important Notes
-
-- ⚠️ Make sure to run `python train_model.py` before starting the backend (generates `digit_model.h5`)
-- ⚠️ The backend must be running before you can use the application
-- 🍎 macOS uses port 5000 for AirPlay, so this app uses port 8080 instead
-- 📁 All files must be in the same directory
 
 ---
 
@@ -74,7 +65,7 @@ moji/
 
 ---
 
-## ❓ Troubleshooting
+## Troubleshooting
 
 **Model not found error?**
 - Run `python train_model.py` first
